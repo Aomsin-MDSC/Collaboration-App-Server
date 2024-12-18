@@ -5,13 +5,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer("Server=10.24.8.14;Database=AppDB;User Id=AppDB;Password=test12345;Encrypt=False;TrustServerCertificate=True;"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyCorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 
@@ -19,4 +30,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.UseCors("MyCorsPolicy");
+
+app.Run("http://10.24.8.16:5263");
