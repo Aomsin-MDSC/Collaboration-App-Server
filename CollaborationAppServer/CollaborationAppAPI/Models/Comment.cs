@@ -9,8 +9,8 @@ namespace CollaborationAppAPI.Models
         public required string Comment_text { get; set; }
         public required DateTime Comment_date { get; set; }
         public int User_id { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
         public int? Task_id { get; set; }
-        public Task Task { get; set; }
+        public Task? Task { get; set; }
     }
 }

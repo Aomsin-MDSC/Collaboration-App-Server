@@ -11,14 +11,13 @@ namespace CollaborationAppAPI.Models
 
         // Foreign Keys
         public int User_id { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
 
-
-        public Member Member { get; set; }
+        public ICollection<Member>? Members { get; set; }
 
         public int? Tag_id { get; set; }
-        public Tag Tag { get; set; }
-        public ICollection<Task> Tasks { get; set; }
-        public Announce Announce { get; set; }
+        public Tag? Tag { get; set; }
+        public ICollection<Task>? Tasks { get; set; }
+        public Announce? Announce { get; set; }
     }
 }

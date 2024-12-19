@@ -1,9 +1,11 @@
 ﻿using CollaborationAppAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [Route("api")]
 [ApiController]
+[Authorize]
 public class ProjectsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -12,6 +14,7 @@ public class ProjectsController : ControllerBase
     {
         _context = context;
     }
+
     [HttpGet("Test")]
     public IActionResult Test()
     {
@@ -19,17 +22,23 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("GetProjects")]
-    public async Task<IActionResult> GetProjects()
+    public async Task<IActionResult> GetUserProjects()
     {
-        var projects = await _context.Projects
-            .Include(p => p.User)
-            .Include(p => p.Tag)
-            .Select(p => new
+        var userIdClaim = User.FindFirst("userId");
+        if (userIdClaim == null)
+        {
+            return Unauthorized(new { Message = "Invalid token or user not authenticated" });
+        }
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var projects = await _context.Members
+            .Where(m => m.User_id == userId)
+            .Include(m => m.Project)
+            .Select(m => new
             {
-                ProjectId = p.Project_id,
-                ProjectName = p.Project_name,
-                UserName = p.User.User_name,
-                TagName = p.Tag.Tag_name
+                m.Project.Project_id,
+                m.Project.Project_name
             })
             .ToListAsync();
 

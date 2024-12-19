@@ -23,11 +23,18 @@ namespace CollaborationAppAPI.Models
                 .WithMany(u => u.Projects)
                 .HasForeignKey(p => p.User_id);
 
-            // One-to-One Relationship between Project and Member
             modelBuilder.Entity<Member>()
-                .HasOne(p => p.Project)
-                .WithOne(m => m.Member)
-                .HasForeignKey<Member>(p => p.Project_id);
+                       .HasKey(m => new { m.User_id, m.Project_id }); 
+
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.User)
+                .WithMany(u => u.Members)
+                .HasForeignKey(m => m.User_id);
+
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.Project)
+                .WithMany(p => p.Members)
+                .HasForeignKey(m => m.Project_id);
 
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.Tag)

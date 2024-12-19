@@ -12,12 +12,12 @@ namespace CollaborationAppAPI.Models
         public required string Task_color { get; set; }
         public required string Task_status { get; set; }
         public int? Project_id { get; set; }
-        public Project Project { get; set; }
-        public ICollection<Comment> Comments { get; set; }
+        public Project? Project { get; set; }
+        public ICollection<Comment>? Comments { get; set; }
         public int? Tag_id { get; set; }
-        public Tag Tag { get; set; }
+        public Tag? Tag { get; set; }
         public int? User_id { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
 
 
     }
