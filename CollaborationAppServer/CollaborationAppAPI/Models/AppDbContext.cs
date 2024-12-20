@@ -23,8 +23,13 @@ namespace CollaborationAppAPI.Models
                 .WithMany(u => u.Projects)
                 .HasForeignKey(p => p.User_id);
 
+
             modelBuilder.Entity<Member>()
-                       .HasKey(m => new { m.User_id, m.Project_id }); 
+                .HasKey(m => new { m.User_id, m.Project_id });
+
+            modelBuilder.Entity<Member>()
+                .Property(m => m.Member_id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Member>()
                 .HasOne(m => m.User)
@@ -36,10 +41,12 @@ namespace CollaborationAppAPI.Models
                 .WithMany(p => p.Members)
                 .HasForeignKey(m => m.Project_id);
 
+
+
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.Tag)
-                .WithOne(m => m.Project)
-                .HasForeignKey<Project>(p => p.Tag_id);
+                .WithMany(m => m.Projects)
+                .HasForeignKey(p => p.Tag_id);
 
             modelBuilder.Entity<Project>()
                 .HasMany(t => t.Tasks)

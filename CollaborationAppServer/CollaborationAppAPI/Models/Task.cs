@@ -10,7 +10,7 @@ namespace CollaborationAppAPI.Models
         public required string Task_detail { get; set; }
         public required DateTime Task_end { get; set; }
         public required string Task_color { get; set; }
-        public required string Task_status { get; set; }
+        public required bool Task_status { get; set; }
         public int? Project_id { get; set; }
         public Project? Project { get; set; }
         public ICollection<Comment>? Comments { get; set; }
