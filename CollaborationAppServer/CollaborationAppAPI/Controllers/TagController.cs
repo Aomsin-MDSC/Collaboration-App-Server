@@ -45,6 +45,52 @@ using Microsoft.EntityFrameworkCore;
             return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
         }
     }
+    [HttpPut("UpdateTag/{id}")]
+    public async Task<IActionResult> UpdateTag(int id, [FromBody] Tag tag)
+    {
+        try
+        {
+            var existingTag = await _context.Tags.FindAsync(id);
+            if (existingTag == null)
+            {
+                return NotFound(new { Message = "Tag not found" });
+            }
+
+            existingTag.Tag_name = tag.Tag_name;
+            existingTag.Tag_color = tag.Tag_color;
+
+            _context.Tags.Update(existingTag);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Tag updated successfully!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+        }
+    }
+    [HttpDelete("DeleteTag/{id}")]
+    public async Task<IActionResult> DeleteTag(int id)
+    {
+        try
+        {
+            var tagToDelete = await _context.Tags.FindAsync(id);
+            if (tagToDelete == null)
+            {
+                return NotFound(new { Message = "Tag not found" });
+            }
+
+            _context.Tags.Remove(tagToDelete);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Tag deleted successfully!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+        }
+    }
+
 
 
 }
