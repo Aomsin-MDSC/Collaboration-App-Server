@@ -13,14 +13,15 @@ public class TaskController : ControllerBase
     public TaskController(AppDbContext context)
     {
         _context = context;
-    }       
+    }
 
-    [HttpGet("GetTasks")]
-    public async Task<IActionResult> GetTasks()
+    [HttpGet("GetTasks/{projectId}")]
+    public async Task<IActionResult> GetTasks(int projectId)
     {
         try
         {
             var tasks = await _context.Tasks
+                .Where(t => t.Project_id == projectId)
                 .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id })
 
                 .ToListAsync();
@@ -80,6 +81,34 @@ public class TaskController : ControllerBase
             return BadRequest(new { Message = ex.Message, Details = ex.InnerException?.Message });
         }
     }
+    [HttpPut("UpdateStatus/{taskId}")]
+    public async Task<IActionResult> UpdateTaskStatus(int taskId, [FromBody] TaskStatusUpdateDto updatedTask)
+    {
+        try
+        {
+            var existingTask = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Task_id == taskId);
+                
+            if (existingTask == null)
+            {
+                return NotFound(new { Message = "Task not found" });
+            }
+
+            existingTask.Task_status = updatedTask.Task_status;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Task updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                Message = ex.Message,
+                Details = ex.InnerException?.Message
+            });
+        }
+    }
     [HttpDelete("DeleteTask/{id}")]
     public async Task<IActionResult> DeleteTask(int id)
     {
@@ -103,6 +132,12 @@ public class TaskController : ControllerBase
             return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
         }
     }
+
+    public class TaskStatusUpdateDto
+    {
+        public bool Task_status { get; set; }
+    }
+
 
 
 }
