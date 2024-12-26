@@ -14,14 +14,14 @@ public class AnnouncesController : ControllerBase
     {
         _context = context;
     }
-    [HttpGet("GetAnnounces")]
-    public async Task<IActionResult> GetAnnounces()
+    [HttpGet("GetAnnounce/{projectId}")]
+    public async Task<IActionResult> GetAnnounceById(int projectId)
     {
         try
         {
             var announces = await _context.Announces
-                .Where(a => a != null)
-                .Select(a => new { a.Announce_id, a.Announce_text, a.Project_id, a.Announce_date })
+                .Where(t => t.Project_id == projectId)
+                .Select(a => new { a.Announce_id, a.Announce_text, a.Project_id, a.Announce_date, a.Announce_title })
                 .ToListAsync();
             if (announces == null || !announces.Any())
             {
@@ -65,7 +65,8 @@ public class AnnouncesController : ControllerBase
 
             existingAnnounce.Announce_text = announce.Announce_text;
             existingAnnounce.Announce_date = announce.Announce_date;
-            
+            existingAnnounce.Announce_title = announce.Announce_title;
+
             _context.Announces.Update(existingAnnounce);
             await _context.SaveChangesAsync();
 
