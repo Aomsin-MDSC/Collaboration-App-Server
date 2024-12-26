@@ -35,6 +35,28 @@ public class MembersController : ControllerBase
             return BadRequest(new { Error = ex.Message });
         }
     }
+    [HttpGet("GetMember/{projectId}")]
+    public async Task<IActionResult> GetMemberById(int projectId)
+    {
+        try
+        {
+            var members = await _context.Members
+                .Where(t => t.Project_id == projectId)
+                .Include(m => m.User)
+                .GroupBy(m => m.User_id)
+                .Select(g => new {
+                    User_id = g.Key,
+                    User_name = g.FirstOrDefault().User.User_name,
+                })
+                .ToListAsync();
+
+            return Ok(members);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
 
 }
 
