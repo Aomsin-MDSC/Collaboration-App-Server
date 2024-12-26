@@ -178,6 +178,47 @@ public class ProjectsController : ControllerBase
             return BadRequest(new { Error = ex.Message });
         }
     }
+    [HttpDelete("DeleteProject/{projectId}")]
+    public async Task<IActionResult> DeleteProject(int projectId)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { Message = "Invalid token or user not authenticated" });
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var project = await _context.Projects
+                .Include(p => p.Members)  
+                .FirstOrDefaultAsync(p => p.Project_id == projectId);
+
+            if (project == null)
+            {
+                return NotFound(new { Message = "Project not found." });
+            }
+
+            if (project.User_id != userId)
+            {
+                return Forbid("You do not have permission to delete this project.");
+            }
+
+            _context.Members.RemoveRange(project.Members);
+
+            _context.Projects.Remove(project);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Project deleted successfully!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
 }
 
 public class ProjectUpdateRequest
