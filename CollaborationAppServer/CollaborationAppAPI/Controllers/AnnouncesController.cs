@@ -20,8 +20,9 @@ public class AnnouncesController : ControllerBase
         try
         {
             var announces = await _context.Announces
+                .Include(a => a.Project)
                 .Where(t => t.Project_id == projectId)
-                .Select(a => new { a.Announce_id, a.Announce_text, a.Project_id, a.Announce_date, a.Announce_title })
+                .Select(a => new { a.Announce_id, a.Announce_text, a.Project_id, a.Announce_date, a.Announce_title, a.Project.User_id })
                 .ToListAsync();
             if (announces == null || !announces.Any())
             {

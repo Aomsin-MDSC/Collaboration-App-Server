@@ -21,8 +21,9 @@ public class TaskController : ControllerBase
         try
         {
             var tasks = await _context.Tasks
+                .Include(p => p.User)
                 .Where(t => t.Project_id == projectId)
-                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id })
+                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name })
 
                 .ToListAsync();
 

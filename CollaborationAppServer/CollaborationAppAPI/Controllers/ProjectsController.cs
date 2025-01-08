@@ -33,15 +33,28 @@ public class ProjectsController : ControllerBase
 
         int userId = int.Parse(userIdClaim.Value);
 
-        var projects = await _context.Members
+        var memberProjects = _context.Members
             .Where(m => m.User_id == userId)
             .Include(m => m.Project)
             .Select(m => new
             {
                 m.Project.Project_id,
                 m.Project.Project_name,
-                m.Project.User_id
-            })
+                m.Project.User_id,
+                m.Project.Tag_id,
+            });
+        var ownedProjects = _context.Projects
+     .Where(p => p.User_id == userId)
+     .Select(p => new
+     {
+         p.Project_id,
+         p.Project_name,
+         p.User_id,
+         p.Tag_id,
+     });
+
+        var projects = await ownedProjects
+            .Union(memberProjects)
             .ToListAsync();
 
         return Ok(projects);
