@@ -23,7 +23,7 @@ public class TaskController : ControllerBase
             var tasks = await _context.Tasks
                 .Include(p => p.User)
                 .Where(t => t.Project_id == projectId)
-                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name })
+                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner })
 
                 .ToListAsync();
 
@@ -55,7 +55,6 @@ public class TaskController : ControllerBase
         try
         {
             var existingTask = await _context.Tasks
-                .Include(t => t.User)
                 .Include(t => t.Tag)
                 .Include(t => t.Project)
                 .FirstOrDefaultAsync(t => t.Task_id == taskId);
@@ -70,7 +69,7 @@ public class TaskController : ControllerBase
             existingTask.Task_end = updatedTask.Task_end;
             existingTask.Task_color = updatedTask.Task_color;
             existingTask.Task_status = updatedTask.Task_status;
-            existingTask.User_id = updatedTask.User_id;
+            existingTask.Task_Owner = updatedTask.Task_Owner;
             existingTask.Tag_id = updatedTask.Tag_id;
 
             await _context.SaveChangesAsync();
