@@ -36,21 +36,26 @@ public class ProjectsController : ControllerBase
         var memberProjects = _context.Members
             .Where(m => m.User_id == userId)
             .Include(m => m.Project)
+                .ThenInclude(p => p.User)
+            .Include(m => m.User)
             .Select(m => new
             {
                 m.Project.Project_id,
                 m.Project.Project_name,
                 m.Project.User_id,
                 m.Project.Tag_id,
+                m.Project.User.User_name
             });
-        var ownedProjects = _context.Projects
+      var ownedProjects = _context.Projects
      .Where(p => p.User_id == userId)
+     .Include(p => p.User)
      .Select(p => new
      {
          p.Project_id,
          p.Project_name,
          p.User_id,
          p.Tag_id,
+         p.User.User_name
      });
 
         var projects = await ownedProjects
