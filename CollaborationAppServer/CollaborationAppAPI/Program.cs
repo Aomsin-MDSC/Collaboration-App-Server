@@ -3,8 +3,19 @@ using CollaborationAppAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
+
+string jsonPath = @"collaboration-app-9e58f-firebase-adminsdk-4jt3t-3434ad4e3e.json";
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(jsonPath),
+});
+
+builder.Services.AddControllersWithViews();
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>

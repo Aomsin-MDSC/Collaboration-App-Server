@@ -62,6 +62,30 @@ namespace CollaborationAppAPI.Controllers
             });
         }
 
+        [HttpPut("TokenDevice/{id}")]
+        public async Task<IActionResult> TokenDevice(int id, [FromBody] UserTokenUpdateDTO dto)
+        {
+            try
+            {
+                var existingUser = await _context.Users.FindAsync(id);
+                existingUser.User_token = dto.User_token;
+
+                _context.Users.Update(existingUser);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "UserToken updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+            }
+        }
+
+        public class UserTokenUpdateDTO
+        {
+            public string User_token { get; set; } 
+        }   
+
         private string GenerateJwtToken(User user)
         {
             var claims = new[]

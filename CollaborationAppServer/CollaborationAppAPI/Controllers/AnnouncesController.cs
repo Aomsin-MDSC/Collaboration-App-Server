@@ -43,7 +43,7 @@ public class AnnouncesController : ControllerBase
         {
             _context.Announces.Add(announce);
             await _context.SaveChangesAsync();
-
+            await FirebaseController.MakeAnnounce();
             return Ok(new { Message = "Announce created successfully!" });
         }
         catch (Exception ex)
