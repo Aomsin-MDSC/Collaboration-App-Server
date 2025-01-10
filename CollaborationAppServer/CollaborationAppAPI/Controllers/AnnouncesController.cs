@@ -50,7 +50,7 @@ public class AnnouncesController : ControllerBase
         {
             _context.Announces.Add(announce);
             await _context.SaveChangesAsync();
-            await _firebaseController.NotificationAnnounce(announce.Project_id);
+            await _firebaseController.NotificationAnnounce(announce.Project_id,announce.Announce_title,announce.Announce_text);
             return Ok(new { Message = "Announce created successfully!" });
         }
         catch (Exception ex)

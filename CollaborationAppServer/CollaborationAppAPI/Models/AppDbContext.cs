@@ -58,6 +58,7 @@ namespace CollaborationAppAPI.Models
                 .WithOne(a => a.Announce)
                 .HasForeignKey<Announce>(p => p.Project_id);
 
+
             modelBuilder.Entity<Comment>()
                 .HasOne(u => u.User)
                 .WithMany(c => c.Comments)

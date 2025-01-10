@@ -8,9 +8,8 @@ namespace CollaborationAppAPI.Models
         public int Announce_id { get; set; }
         public required string Announce_text { get; set; }
         public required DateTime Announce_date { get; set; }
-        [Required]
         public int Project_id { get; set; }
-        public Project Project { get; set; }
+        public Project? Project { get; set; }
         public required string Announce_title { get; set; }
     }
 }
