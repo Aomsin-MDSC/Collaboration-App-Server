@@ -8,12 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 public class AnnouncesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _context;  
+    private readonly FirebaseController _firebaseController;
 
-    public AnnouncesController(AppDbContext context)
+    public AnnouncesController(AppDbContext context, FirebaseController firebaseController)
     {
         _context = context;
+        _firebaseController = firebaseController;
     }
+
     [HttpGet("GetAnnounce/{projectId}")]
     public async Task<IActionResult> GetAnnounceById(int projectId)
     {
@@ -39,11 +42,15 @@ public class AnnouncesController : ControllerBase
     [HttpPost("CreateAnnounces")]
     public async Task<IActionResult> CreateAnnounces([FromBody] Announce announce)
     {
+        if (announce.Project_id == 0)
+        {
+            return BadRequest(new { Error = "Project field is required." });
+        }
         try
         {
             _context.Announces.Add(announce);
             await _context.SaveChangesAsync();
-            await FirebaseController.NotificationAnnounce();
+            await _firebaseController.NotificationAnnounce(announce.Project_id);
             return Ok(new { Message = "Announce created successfully!" });
         }
         catch (Exception ex)
