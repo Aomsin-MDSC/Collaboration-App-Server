@@ -10,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 public class CommmentController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly FirebaseController _firebaseController;
 
-    public CommmentController(AppDbContext context)
+    public CommmentController(AppDbContext context, FirebaseController firebaseController)
     {
         _context = context;
+        _firebaseController = firebaseController;
     }
     [HttpGet("GetComments/{taskId}")]
     public async Task<IActionResult> GetComments(int taskId)
@@ -41,6 +43,7 @@ public class CommmentController : ControllerBase
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
+            await _firebaseController.NotificationComment(comment.Task_id,comment.Comment_text);
             return Ok(new { Message = "Comments created successfully!" });
         }
         catch (Exception ex)

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google;
+using System.Diagnostics;
 public class FirebaseController
 {
     private readonly AppDbContext _context;
@@ -54,25 +55,38 @@ public class FirebaseController
         }
     }
 
-    public async System.Threading.Tasks.Task NotificationAssignment()
+    public async System.Threading.Tasks.Task NotificationAssignment(int taskId, string task_Name, string task_detail)
 {
     try
     {
-        var message = new MulticastMessage()
-        {
-            Tokens = new List<string>
-                {
-                    "dymo4AheSEeMQb4oVW5Tj_:APA91bGO0ac8PiwvHbB3pZHsV2qDCmdECSkqdjcxXaprZagHyMFT6oRi7y0Hb7wRKn5T62S8-9l73JO2enaBCZXsx_JvD3fnMcjwRkaCUUvbdEfyDShttn8",
-                    "cdiy5vJwTea1qTz5zhmrI1:APA91bEiJpoFZtlaw6-nYXaqd0RijnMdz8tcMf2N-N9pR9fuq_WBnzJx9yQixIrifBKtWteNmaXicfjtqKqH2k5txJBnfRWWzkWtPUB3JHfZZsS2sK6-4Jw",
-                    //api
-                },
-            Notification = new Notification
+            var task = await _context.Tasks
+         .FirstOrDefaultAsync(t => t.Task_id == taskId);
+
+            if (task == null)
+            {
+                Console.WriteLine("Task not found.");
+                return;
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.User_id == task.Task_Owner);
+
+            if (user == null || string.IsNullOrEmpty(user.User_token))
+            {
+                Console.WriteLine("User not found or User_token is empty.");
+                return;
+            }
+            var message = new Message()
+            {
+            Token = user.User_token,
+
+                Notification = new Notification
             {
                 Title = "You have Assignment!",
-                Body = "TaskName : ?????????????????????????????????????????????????????????????????????????????????????????????????????",
+                Body = $"{task_Name} : {task_detail}",
             },
         };
-        var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+        var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
     }
     catch (Exception ex)
     {
@@ -80,25 +94,38 @@ public class FirebaseController
         }
 }
 
-public async System.Threading.Tasks.Task NotificationComment()
+public async System.Threading.Tasks.Task NotificationComment(int taskId,string comment_text)
 {
     try
     {
-        var message = new MulticastMessage()
-        {
-            Tokens = new List<string>
-                {
-                    "dymo4AheSEeMQb4oVW5Tj_:APA91bGO0ac8PiwvHbB3pZHsV2qDCmdECSkqdjcxXaprZagHyMFT6oRi7y0Hb7wRKn5T62S8-9l73JO2enaBCZXsx_JvD3fnMcjwRkaCUUvbdEfyDShttn8",
-                    "cdiy5vJwTea1qTz5zhmrI1:APA91bEiJpoFZtlaw6-nYXaqd0RijnMdz8tcMf2N-N9pR9fuq_WBnzJx9yQixIrifBKtWteNmaXicfjtqKqH2k5txJBnfRWWzkWtPUB3JHfZZsS2sK6-4Jw",
-                    //api
-                },
+            var task = await _context.Tasks
+      .FirstOrDefaultAsync(t => t.Task_id == taskId);
+
+            if (task == null)
+            {
+                Console.WriteLine("Task not found.");
+                return;
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.User_id == task.Task_Owner);
+
+            if (user == null || string.IsNullOrEmpty(user.User_token))
+            {
+                Console.WriteLine("User not found or User_token is empty.");
+                return;
+            }
+            var message = new Message()
+            {
+            Token = user.User_token,
+                
             Notification = new Notification
             {
-                Title = "{Username}",
-                Body = "Comment in your Task : ?????????????????????????????????????????????????????",
+                Title = $"{user.User_name}",
+                Body = $"Comment in your Task : {comment_text}",
             },
         };
-        var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+        var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
     }
     catch (Exception ex)
     {
@@ -106,18 +133,29 @@ public async System.Threading.Tasks.Task NotificationComment()
         }
 }
 
-public async System.Threading.Tasks.Task NotificationTaskStatus()
+public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId)
 {
     try
     {
-        var message = new MulticastMessage()
+            var memberList = await _context.Members
+                .Where(m => m.Project_id == projectId)
+                .Include(m => m.User)
+                .ToListAsync();
+
+            var tokens = memberList
+                .Where(m => !string.IsNullOrEmpty(m.User.User_token))
+                .Select(m => m.User.User_token)
+                .ToList();
+
+            if (tokens.Count == 0)
+            {
+                Console.WriteLine("No valid tokens found.");
+                return;
+            }
+
+            var message = new MulticastMessage()
         {
-            Tokens = new List<string>
-                {
-                    "dymo4AheSEeMQb4oVW5Tj_:APA91bGO0ac8PiwvHbB3pZHsV2qDCmdECSkqdjcxXaprZagHyMFT6oRi7y0Hb7wRKn5T62S8-9l73JO2enaBCZXsx_JvD3fnMcjwRkaCUUvbdEfyDShttn8",
-                    "cdiy5vJwTea1qTz5zhmrI1:APA91bEiJpoFZtlaw6-nYXaqd0RijnMdz8tcMf2N-N9pR9fuq_WBnzJx9yQixIrifBKtWteNmaXicfjtqKqH2k5txJBnfRWWzkWtPUB3JHfZZsS2sK6-4Jw",
-                    //api
-                },
+            Tokens = tokens,
             Notification = new Notification
             {
                 Title = "{TaskName}",

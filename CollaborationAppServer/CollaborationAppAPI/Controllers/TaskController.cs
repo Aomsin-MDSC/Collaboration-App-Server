@@ -1,4 +1,5 @@
-﻿using CollaborationAppAPI.Models;
+﻿using System.Threading.Tasks;
+using CollaborationAppAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 public class TaskController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly FirebaseController _firebaseController;
 
-    public TaskController(AppDbContext context)
+    public TaskController(AppDbContext context, FirebaseController firebaseController)
     {
         _context = context;
+        _firebaseController = firebaseController;
     }
 
     [HttpGet("GetTasks/{projectId}")]
@@ -41,7 +44,7 @@ public class TaskController : ControllerBase
         {
             _context.Tasks.Add(tasks);
             await _context.SaveChangesAsync();
-
+            await _firebaseController.NotificationAssignment(tasks.Task_id,tasks.Task_name,tasks.Task_detail);
             return Ok(new { Message = "Task created successfully!" });
         }
         catch (Exception ex)
@@ -98,6 +101,12 @@ public class TaskController : ControllerBase
 
             await _context.SaveChangesAsync();
 
+            if (updatedTask.Task_status)
+            {
+                await _firebaseController.NotificationTaskStatus(updatedTask.Project_id);
+            }
+            
+
             return Ok(new { Message = "Task updated successfully" });
         }
         catch (Exception ex)
@@ -136,6 +145,7 @@ public class TaskController : ControllerBase
     public class TaskStatusUpdateDto
     {
         public bool Task_status { get; set; }
+        public int Project_id { get; set; }
     }
 
 
