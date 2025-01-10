@@ -21,6 +21,30 @@ namespace CollaborationAppAPI.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet("GetUsers")]
+        public async Task<IActionResult> GetUsers()
+        {
+            try
+            {
+                var members = await _context.Users
+                    .GroupBy(m => m.User_id)
+                    .Select(g => new
+                    {
+                        User_id = g.Key,
+                        User_name = g.FirstOrDefault().User_name
+                    })
+                    .ToListAsync();
+
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here using a logger (e.g., ILogger)
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
