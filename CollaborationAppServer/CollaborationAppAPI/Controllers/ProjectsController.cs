@@ -37,25 +37,32 @@ public class ProjectsController : ControllerBase
             .Where(m => m.User_id == userId)
             .Include(m => m.Project)
                 .ThenInclude(p => p.User)
+             .Include(m => m.Project)
+                .ThenInclude(p => p.Tag)
             .Include(m => m.User)
-            .Select(m => new
+            .Select(m => new    
             {
-                m.Project.Project_id,
-                m.Project.Project_name,
-                m.Project.User_id,
-                m.Project.Tag_id,
-                m.Project.User.User_name
+                Project_id = m.Project.Project_id,
+                Project_name = m.Project.Project_name,
+                User_id = m.Project.User_id,
+                Tag_id = m.Project.Tag_id,
+                Tag_name = m.Project.Tag.Tag_name,
+                Tag_color = m.Project.Tag.Tag_color,
+                User_name = m.Project.User.User_name
             });
       var ownedProjects = _context.Projects
      .Where(p => p.User_id == userId)
      .Include(p => p.User)
+     .Include(p => p.Tag)
      .Select(p => new
      {
-         p.Project_id,
-         p.Project_name,
-         p.User_id,
-         p.Tag_id,
-         p.User.User_name
+         Project_id = p.Project_id,
+         Project_name = p.Project_name,
+         User_id = p.User_id,
+         Tag_id = p.Tag_id,
+         Tag_name = p.Tag.Tag_name,
+         Tag_color = p.Tag.Tag_color,
+         User_name = p.User.User_name
      });
 
         var projects = await ownedProjects
@@ -250,7 +257,7 @@ public class ProjectUpdateRequest
 public class CreateProjectDto
     {
         public string ProjectName { get; set; }
-        public int TagId { get; set; }
+        public int? TagId { get; set; }
         public List<MemberDto> Members { get; set; }
     }
 

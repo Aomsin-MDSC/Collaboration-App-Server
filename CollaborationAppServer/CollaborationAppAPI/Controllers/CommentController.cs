@@ -43,7 +43,7 @@ public class CommmentController : ControllerBase
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            await _firebaseController.NotificationComment(comment.Task_id,comment.Comment_text);
+            await _firebaseController.NotificationComment(comment.Task_id,comment.Comment_text, comment.User_id);
             return Ok(new { Message = "Comments created successfully!" });
         }
         catch (Exception ex)

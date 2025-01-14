@@ -94,12 +94,12 @@ public class FirebaseController
         }
 }
 
-public async System.Threading.Tasks.Task NotificationComment(int taskId,string comment_text)
+public async System.Threading.Tasks.Task NotificationComment(int taskId,string comment_text, int userId)
 {
     try
     {
             var task = await _context.Tasks
-      .FirstOrDefaultAsync(t => t.Task_id == taskId);
+                .FirstOrDefaultAsync(t => t.Task_id == taskId);
 
             if (task == null)
             {
@@ -115,13 +115,16 @@ public async System.Threading.Tasks.Task NotificationComment(int taskId,string c
                 Console.WriteLine("User not found or User_token is empty.");
                 return;
             }
+            var commentingUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.User_id == userId);
+
             var message = new Message()
             {
             Token = user.User_token,
                 
             Notification = new Notification
             {
-                Title = $"{user.User_name}",
+                Title = $"{commentingUser.User_name}",
                 Body = $"Comment in your Task : {comment_text}",
             },
         };

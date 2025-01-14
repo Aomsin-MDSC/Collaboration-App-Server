@@ -124,11 +124,17 @@ public class TaskController : ControllerBase
         try
         {
             var task = await _context.Tasks
+                 .Include(t => t.Comments)
                 .FirstOrDefaultAsync(a => a.Task_id == id);
 
             if (task == null)
             {
                 return NotFound(new { Message = "Task not found" });
+            }
+
+            if (task.Comments != null && task.Comments.Any())
+            {
+                _context.Comments.RemoveRange(task.Comments);
             }
 
             _context.Tasks.Remove(task);
