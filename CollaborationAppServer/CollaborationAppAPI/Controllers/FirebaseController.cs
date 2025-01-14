@@ -107,6 +107,12 @@ public async System.Threading.Tasks.Task NotificationComment(int taskId,string c
                 return;
             }
 
+            if (task.Task_Owner == userId)
+            {
+                Console.WriteLine("No notification needed: user is the task owner.");
+                return;
+            }
+
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.User_id == task.Task_Owner);
 
