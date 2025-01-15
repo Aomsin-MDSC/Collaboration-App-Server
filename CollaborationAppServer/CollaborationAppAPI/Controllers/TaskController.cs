@@ -28,8 +28,8 @@ public class TaskController : ControllerBase
                 .Include(p => p.User)
                 .Include(t => t.Tag)
                 .Where(t => t.Project_id == projectId)
-                .OrderBy(t => t.Task_Order)
-                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner,t.Tag.Tag_name,t.Tag.Tag_color,t.Task_Order })
+                .OrderBy(t => t.Task_order)
+                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner,t.Tag.Tag_name,t.Tag.Tag_color,t.Task_order })
 
                 .ToListAsync();
 
@@ -106,7 +106,7 @@ public class TaskController : ControllerBase
 
             if (updatedTask.Task_status)
             {
-                await _firebaseController.NotificationTaskStatus(updatedTask.Project_id);
+                await _firebaseController.NotificationTaskStatus(updatedTask.Project_id,updatedTask.Task_name);
             }
             
 
@@ -145,7 +145,7 @@ public class TaskController : ControllerBase
             foreach (var task in tasks)
             {
                 var newOrder = taskOrderUpdates.First(t => t.Task_id == task.Task_id).TaskOrder;
-                task.Task_Order = newOrder;
+                task.Task_order = newOrder;
             }
 
             await _context.SaveChangesAsync();
@@ -193,6 +193,7 @@ public class TaskController : ControllerBase
     {
         public bool Task_status { get; set; }
         public int Project_id { get; set; }
+        public string Task_name { get; set; }
     }
     public class TaskOrderUpdateDto
     {

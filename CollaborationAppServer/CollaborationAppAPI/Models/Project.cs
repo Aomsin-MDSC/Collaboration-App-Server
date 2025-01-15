@@ -18,6 +18,6 @@ namespace CollaborationAppAPI.Models
         public int? Tag_id { get; set; }
         public Tag? Tag { get; set; }
         public ICollection<Task>? Tasks { get; set; }
-        public Announce? Announce { get; set; }
+        public ICollection<Announce> Announces { get; set; }
     }
 }

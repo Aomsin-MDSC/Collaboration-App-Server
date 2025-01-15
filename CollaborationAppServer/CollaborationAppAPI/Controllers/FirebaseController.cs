@@ -142,7 +142,7 @@ public async System.Threading.Tasks.Task NotificationComment(int taskId,string c
         }
 }
 
-public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId)
+public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId,string taskName)
 {
     try
     {
@@ -167,7 +167,7 @@ public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId)
             Tokens = tokens,
             Notification = new Notification
             {
-                Title = "{TaskName}",
+                Title = $"{taskName}",
                 Body = "Change status is done.",
             },
         };

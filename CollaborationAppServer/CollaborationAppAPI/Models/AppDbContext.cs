@@ -51,12 +51,15 @@ namespace CollaborationAppAPI.Models
             modelBuilder.Entity<Project>()
                 .HasMany(t => t.Tasks)
                 .WithOne(p => p.Project)
-                .HasForeignKey(p => p.Project_id);
+                .HasForeignKey(p => p.Project_id)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Announce>()
                 .HasOne(p => p.Project)
-                .WithOne(a => a.Announce)
-                .HasForeignKey<Announce>(p => p.Project_id);
+                .WithMany(a => a.Announces)
+                .HasForeignKey(p => p.Project_id)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
 
             modelBuilder.Entity<Comment>()
@@ -67,7 +70,8 @@ namespace CollaborationAppAPI.Models
             modelBuilder.Entity<Comment>()
                 .HasOne(t => t.Task)
                 .WithMany(c => c.Comments)
-                .HasForeignKey(c => c.Task_id);
+                .HasForeignKey(c => c.Task_id)
+            .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Task>()
                 .HasOne(t => t.Tag)

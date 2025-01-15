@@ -218,6 +218,9 @@ public class ProjectsController : ControllerBase
 
             var project = await _context.Projects
                 .Include(p => p.Members)  
+                .Include(p => p.Tasks)
+                .ThenInclude(p => p.Comments)
+                .Include(p => p.Announces)
                 .FirstOrDefaultAsync(p => p.Project_id == projectId);
 
             if (project == null)
@@ -240,6 +243,7 @@ public class ProjectsController : ControllerBase
         }
         catch (Exception ex)
         {
+  
             return BadRequest(new { Error = ex.Message });
         }
     }
