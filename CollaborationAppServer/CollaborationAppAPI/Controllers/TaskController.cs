@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using CollaborationAppAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,8 @@ public class TaskController : ControllerBase
                 .Include(p => p.User)
                 .Include(t => t.Tag)
                 .Where(t => t.Project_id == projectId)
-                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner,t.Tag.Tag_name,t.Tag.Tag_color })
+                .OrderBy(t => t.Task_Order)
+                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner,t.Tag.Tag_name,t.Tag.Tag_color,t.Task_Order })
 
                 .ToListAsync();
 
@@ -119,6 +121,44 @@ public class TaskController : ControllerBase
             });
         }
     }
+
+    [HttpPost("UpdateTaskOrder")]
+    public async Task<IActionResult> UpdateTaskOrder([FromBody] List<TaskOrderUpdateDto> taskOrderUpdates)
+    {
+        try
+        {
+            if (taskOrderUpdates == null || !taskOrderUpdates.Any())
+            {
+                return BadRequest(new { Message = "Invalid task order data" });
+            }
+
+            var taskIds = taskOrderUpdates.Select(t => t.Task_id).ToList();
+            var tasks = await _context.Tasks
+                .Where(t => taskIds.Contains(t.Task_id))
+                .ToListAsync();
+
+            if (tasks.Count != taskOrderUpdates.Count)
+            {
+                return BadRequest(new { Message = "Some tasks were not found" });
+            }
+
+            foreach (var task in tasks)
+            {
+                var newOrder = taskOrderUpdates.First(t => t.Task_id == task.Task_id).TaskOrder;
+                task.Task_Order = newOrder;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Task order updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+        }
+    }
+
+
     [HttpDelete("DeleteTask/{id}")]
     public async Task<IActionResult> DeleteTask(int id)
     {
@@ -153,6 +193,11 @@ public class TaskController : ControllerBase
     {
         public bool Task_status { get; set; }
         public int Project_id { get; set; }
+    }
+    public class TaskOrderUpdateDto
+    {
+        public int Task_id { get; set; }
+        public int TaskOrder { get; set; }
     }
 
 
