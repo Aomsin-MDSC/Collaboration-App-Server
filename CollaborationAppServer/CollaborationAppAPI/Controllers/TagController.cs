@@ -61,14 +61,24 @@ using Microsoft.EntityFrameworkCore;
             {
                 return NotFound(new { Message = "Tag not found" });
             }
+            bool exist = id == existingTag.Tag_id;
+            bool exist2 = tag.Tag_name == existingTag.Tag_name;
+            if (exist && exist2)
+            {
+                existingTag.Tag_name = tag.Tag_name;
+                existingTag.Tag_color = tag.Tag_color;
 
-            existingTag.Tag_name = tag.Tag_name;
-            existingTag.Tag_color = tag.Tag_color;
+                _context.Tags.Update(existingTag);
+                await _context.SaveChangesAsync();
 
-            _context.Tags.Update(existingTag);
-            await _context.SaveChangesAsync();
+                return Ok(new { Message = "Tag updated successfully!" });
 
-            return Ok(new { Message = "Tag updated successfully!" });
+            }
+            else
+            {
+                return BadRequest(new { Message = "Already has Tag Existed" });
+            }
+
         }
         catch (Exception ex)
         {
@@ -97,28 +107,28 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 
-    [HttpGet("CheckTags/{tagName}")]
-    public async Task<IActionResult> CheckTag(string tagName)
-    {
-        try
-        {
-            bool extagck = await _context.Tags
-                .AnyAsync(tag => tag.Tag_name == tagName);
+    //[HttpGet("CheckTags/{tagName}/{tagId}")]
+    //public async Task<IActionResult> CheckTag(string tagName, int tagId)
+    //{
+    //    try
+    //    {
+    //        bool extagck = await _context.Tags
+    //            .AnyAsync(tag => tag.Tag_name == tagName && tag.Tag_id != tagId);
 
-            if (extagck)
-            {
-                return BadRequest(new { Message = "Found" });
-            }
-            else
-            {
-                return Ok(new { message = "Not Found" });
-            }
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
-        }
-    }
+    //        if (extagck)
+    //        {
+    //            return BadRequest(new { Message = "Found" });
+    //        }
+    //        else 
+    //        {
+    //            return Ok(new { message = "Not Found" });
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+    //    }
+    //}
 
 }
 
