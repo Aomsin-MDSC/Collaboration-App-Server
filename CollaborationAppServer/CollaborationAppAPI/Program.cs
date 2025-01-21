@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using CollaborationAppAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddScoped<FirebaseController>();
+builder.Services.AddScoped<AnnouncementService>();
+builder.Services.AddHostedService<AnnouncementCleanupService>();
 
 builder.Services.AddControllers();
 
@@ -50,8 +53,6 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-
-
 
 
 var app = builder.Build();

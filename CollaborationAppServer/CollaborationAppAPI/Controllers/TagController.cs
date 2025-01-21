@@ -41,6 +41,13 @@ using Microsoft.EntityFrameworkCore;
                 return BadRequest(new { Message = "Project name cannot be empty or whitespace" });
             }
 
+            var existingTag = await _context.Tags
+                                 .FirstOrDefaultAsync(u => u.Tag_name == tag.Tag_name);
+            if (existingTag != null)
+            {
+                return BadRequest(new { Message = "TagName is already taken." });
+            }
+
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
 

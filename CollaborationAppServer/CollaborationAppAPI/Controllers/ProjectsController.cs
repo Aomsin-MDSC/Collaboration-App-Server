@@ -198,6 +198,16 @@ public class ProjectsController : ControllerBase
             project.Project_name = request.ProjectName;
             project.Tag_id = request.TagId;
 
+            var removedMemberIds = membersToRemove.Select(m => m.User_id.Value).ToList();
+            var tasksToUpdate = await _context.Tasks
+                .Where(t => t.Project_id == projectId && removedMemberIds.Contains(t.Task_Owner.GetValueOrDefault()))
+                .ToListAsync();
+
+            foreach (var task in tasksToUpdate)
+            {
+                task.Task_Owner = null;
+            }
+
 
             await _context.SaveChangesAsync(); 
 

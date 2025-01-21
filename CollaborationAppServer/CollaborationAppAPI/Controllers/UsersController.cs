@@ -56,13 +56,18 @@ namespace CollaborationAppAPI.Controllers
             }
         }
 
-
-
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
-            if (user == null)
-                return BadRequest("Invalid user data.");
+            if (string.IsNullOrWhiteSpace(user.User_name))
+            {
+                return BadRequest(new { Message = "Username cannot be empty or whitespace" });
+            }
+
+            if (string.IsNullOrWhiteSpace(user.User_password))
+            {
+                return BadRequest(new { Message = "Password cannot be empty or whitespace" });
+            }
 
             var existingUser = await _context.Users
                                              .FirstOrDefaultAsync(u => u.User_name == user.User_name);
@@ -97,6 +102,26 @@ namespace CollaborationAppAPI.Controllers
                 UserId = user.User_id,
                 UserName = user.User_name
             });
+        }
+
+        [HttpPut("UpdateUser/{id}")]
+        public async Task<IActionResult> UpdateTag(int id, [FromBody] User user)
+        {
+            try
+            {
+                var existingUser = await _context.Users.FindAsync(id);
+                existingUser.User_name = user.User_name;
+                existingUser.User_password = user.User_password;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "User updated successfully!" });
+            }
+
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+            }
         }
 
         [HttpPut("TokenDevice/{id}")]
