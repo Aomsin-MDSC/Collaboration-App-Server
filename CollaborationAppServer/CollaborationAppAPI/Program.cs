@@ -67,4 +67,4 @@ app.MapControllers();
 
 app.UseCors("MyCorsPolicy");
 
-app.Run("http://10.24.8.10:5263");
+app.Run("http://10.24.8.16:5263");

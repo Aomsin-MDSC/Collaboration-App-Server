@@ -61,9 +61,13 @@ using Microsoft.EntityFrameworkCore;
             {
                 return NotFound(new { Message = "Tag not found" });
             }
+
             bool exist = id == existingTag.Tag_id;
-            bool exist2 = tag.Tag_name == existingTag.Tag_name;
-            if (exist && exist2)
+            bool name = existingTag.Tag_name == tag.Tag_name;
+
+            var tagcheck = await _context.Tags
+                                 .FirstOrDefaultAsync(u => u.Tag_name == tag.Tag_name);
+            if (exist && name)
             {
                 existingTag.Tag_name = tag.Tag_name;
                 existingTag.Tag_color = tag.Tag_color;
@@ -73,6 +77,15 @@ using Microsoft.EntityFrameworkCore;
 
                 return Ok(new { Message = "Tag updated successfully!" });
 
+            }
+            else if (tagcheck == null)
+            {
+                existingTag.Tag_name = tag.Tag_name;
+                existingTag.Tag_color = tag.Tag_color;
+
+                _context.Tags.Update(existingTag);
+                await _context.SaveChangesAsync();
+                return Ok(new { Message = "Tag updated successfully!" });
             }
             else
             {
