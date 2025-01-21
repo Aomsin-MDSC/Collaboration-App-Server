@@ -19,7 +19,7 @@ namespace CollaborationAppAPI.Models
         public int? User_id { get; set; }
         public User? User { get; set; }
 
-        public required int Task_Owner { get; set; }
+        public int? Task_Owner { get; set; }
         public int Task_order { get; set; }
 
 

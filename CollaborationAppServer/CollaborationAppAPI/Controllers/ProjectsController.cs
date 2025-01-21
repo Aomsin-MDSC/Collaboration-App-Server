@@ -113,6 +113,11 @@ public class ProjectsController : ControllerBase
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(dto.ProjectName))
+            {
+                return BadRequest(new { Message = "Project name cannot be empty or whitespace" });
+            }
+
             var userIdClaim = User.FindFirst("userId");
             if (userIdClaim == null)
             {
@@ -253,14 +258,14 @@ public class ProjectsController : ControllerBase
 public class ProjectUpdateRequest
 {
     public string ProjectName { get; set; }
-    public int TagId { get; set; }
+    public int? TagId { get; set; }
     public List<int> Members { get; set; }
 }
 
 // DTO for creating a project
 public class CreateProjectDto
     {
-        public string ProjectName { get; set; }
+        public required string ProjectName { get; set; }
         public int? TagId { get; set; }
         public List<MemberDto> Members { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using CollaborationAppAPI.Models;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,11 @@ using Microsoft.EntityFrameworkCore;
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(tag.Tag_name))
+            {
+                return BadRequest(new { Message = "Project name cannot be empty or whitespace" });
+            }
+
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
 
@@ -91,7 +97,28 @@ using Microsoft.EntityFrameworkCore;
         }
     }
 
+    [HttpGet("CheckTags/{tagName}")]
+    public async Task<IActionResult> CheckTag(string tagName)
+    {
+        try
+        {
+            bool extagck = await _context.Tags
+                .AnyAsync(tag => tag.Tag_name == tagName);
 
+            if (extagck)
+            {
+                return BadRequest(new { Message = "Found" });
+            }
+            else
+            {
+                return Ok(new { message = "Not Found" });
+            }
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+        }
+    }
 
 }
 

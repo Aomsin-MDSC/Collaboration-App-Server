@@ -70,6 +70,8 @@ public class TaskController : ControllerBase
                 return NotFound(new { Message = "Task not found" });
             }
 
+            bool isTaskOwnerChanged = existingTask.Task_Owner != updatedTask.Task_Owner;
+
             existingTask.Task_name = updatedTask.Task_name;
             existingTask.Task_detail = updatedTask.Task_detail;
             existingTask.Task_end = updatedTask.Task_end;
@@ -79,6 +81,11 @@ public class TaskController : ControllerBase
             existingTask.Tag_id = updatedTask.Tag_id;
 
             await _context.SaveChangesAsync();
+
+            if (isTaskOwnerChanged)
+            {
+                await _firebaseController.NotificationAssignment(taskId, updatedTask.Task_name, updatedTask.Task_detail);
+            }
 
             return Ok(new { Message = "Task updated successfully" });
         }
@@ -188,6 +195,48 @@ public class TaskController : ControllerBase
             return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
         }
     }
+
+
+    //[HttpDelete("RemoveMemberFromProject/{projectId}/{userIdToRemove}")]
+    //public async Task<IActionResult> RemoveMemberFromProject(int projectId, int userIdToRemove)
+    //{
+    //    try
+    //    {
+    //        var project = await _context.Projects
+    //            .Include(p => p.Members)
+    //            .Include(p => p.Tasks) 
+    //            .FirstOrDefaultAsync(p => p.Project_id == projectId);
+
+    //        if (project == null)
+    //        {
+    //            return NotFound(new { Message = "Project not found." });
+    //        }
+
+    //        var memberToRemove = project.Members.FirstOrDefault(m => m.User_id == userIdToRemove);
+    //        if (memberToRemove != null)
+    //        {
+    //            _context.Members.Remove(memberToRemove);
+
+    //            var tasksToUpdate = project.Tasks.Where(t => t.User_id == userIdToRemove).ToList();
+    //            foreach (var task in tasksToUpdate)
+    //            {
+    //                task.Task_Owner = 1; 
+    //            }
+
+    //            await _context.SaveChangesAsync();
+    //            return Ok(new { Message = "Member removed and tasks updated successfully." });
+    //        }
+    //        else
+    //        {
+    //            return NotFound(new { Message = "Member not found in this project." });
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new { Error = ex.Message });
+    //    }
+    //}
+
 
     public class TaskStatusUpdateDto
     {

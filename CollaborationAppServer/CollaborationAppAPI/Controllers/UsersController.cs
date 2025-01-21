@@ -26,7 +26,19 @@ namespace CollaborationAppAPI.Controllers
         {
             try
             {
+                // ดึง User_id ของผู้ใช้ปัจจุบัน (สมมติคุณใช้ Claims ใน Token)
+                var userIdClaim = User.FindFirst("userId");
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new { Message = "Invalid token or user not authenticated" });
+                }
+
+                // แปลง User_id ให้เป็นตัวเลข
+                int userId = int.Parse(userIdClaim.Value);
+
+                // กรองไม่ให้ส่งข้อมูลของผู้ใช้ปัจจุบัน
                 var members = await _context.Users
+                    .Where(m => m.User_id != userId) // กรองผู้ใช้
                     .GroupBy(m => m.User_id)
                     .Select(g => new
                     {
@@ -43,6 +55,7 @@ namespace CollaborationAppAPI.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+
 
 
         [HttpPost("register")]
