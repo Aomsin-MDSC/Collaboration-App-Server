@@ -28,6 +28,7 @@ public class FirebaseController
             var tokens = memberList
                 .Where(m => !string.IsNullOrEmpty(m.User.User_token))
                 .Select(m => m.User.User_token)
+                 .Distinct()
                 .ToList();
 
             if (tokens.Count == 0)
@@ -146,32 +147,22 @@ public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId,st
 {
     try
     {
-            var memberList = await _context.Members
-                .Where(m => m.Project_id == projectId)
-                .Include(m => m.User)
-                .ToListAsync();
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(t => t.Project_id == projectId);
 
-            var tokens = memberList
-                .Where(m => !string.IsNullOrEmpty(m.User.User_token))
-                .Select(m => m.User.User_token)
-                .ToList();
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.User_id == project.User_id);
 
-            if (tokens.Count == 0)
-            {
-                Console.WriteLine("No valid tokens found.");
-                return;
-            }
-
-            var message = new MulticastMessage()
+            var message = new Message()
         {
-            Tokens = tokens,
+            Token = user.User_token,
             Notification = new Notification
             {
                 Title = $"{taskName}",
                 Body = "Change status is done.",
             },
         };
-        var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+        var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
     }
     catch (Exception ex)
     {

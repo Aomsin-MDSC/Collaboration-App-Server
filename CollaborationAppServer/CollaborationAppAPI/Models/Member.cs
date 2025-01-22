@@ -11,6 +11,7 @@ namespace CollaborationAppAPI.Models
 
         public int Project_id { get; set; }
         public Project? Project { get; set; }
+        public int Member_role { get; set; }
 
     }
 }

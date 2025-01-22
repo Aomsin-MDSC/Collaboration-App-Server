@@ -141,6 +141,7 @@ public class ProjectsController : ControllerBase
                 {
                     Project_id = project.Project_id,
                     User_id = member.UserId,
+                    Member_role = member.MemberRole
                 };
                 _context.Members.Add(newMember);
             }
@@ -166,33 +167,50 @@ public class ProjectsController : ControllerBase
             var userId = int.Parse(userIdClaim.Value);
 
             var project = await _context.Projects
-                .Include(p => p.Members)  
+                .Include(p => p.Members)
                 .FirstOrDefaultAsync(p => p.Project_id == projectId);
+
             if (project == null)
             {
                 return NotFound(new { Message = "Project not found." });
             }
-            if (project.User_id != userId)
+
+            var isOwner = project.User_id == userId; 
+            var isManager = project.Members.Any(m => m.User_id == userId && m.Member_role == 0);
+
+            if (!isOwner && !isManager)
             {
                 return Forbid("You do not have permission to update this project.");
             }
 
-            var currentMemberIds = project.Members.Select(m => m.User_id).ToList();
             var membersToRemove = project.Members
-                .Where(m => m.User_id.HasValue && !request.Members.Contains(m.User_id.Value))  
+                .Where(m => m.User_id.HasValue && !request.Members.Any(rm => rm.UserId == m.User_id))
                 .ToList();
-            _context.Members.RemoveRange(membersToRemove); 
-            var membersToAdd = request.Members.Where(m => !currentMemberIds.Contains(m)).ToList();
 
-            foreach (var memberId in membersToAdd)
+            _context.Members.RemoveRange(membersToRemove);
+
+            foreach (var memberDto in request.Members)
             {
-                var newMember = new Member
+                var existingMember = project.Members.FirstOrDefault(m => m.User_id == memberDto.UserId);
+                if (existingMember == null)
                 {
-                    Project_id = projectId,
-                    User_id = memberId
-                };
-                _context.Members.Add(newMember);
+                    // สมาชิกใหม่
+                    var newMember = new Member
+                    {
+                        Project_id = projectId,
+                        User_id = memberDto.UserId,
+                        Member_role = memberDto.MemberRole,
+                        // ไม่ต้องระบุ Member_id เพราะฐานข้อมูลจะจัดการเอง
+                    };
+                    _context.Members.Add(newMember);
+                }
+                else
+                {
+                    // อัปเดต Role ของสมาชิกที่มีอยู่
+                    existingMember.Member_role = memberDto.MemberRole;
+                }
             }
+
 
 
             project.Project_name = request.ProjectName;
@@ -208,16 +226,17 @@ public class ProjectsController : ControllerBase
                 task.Task_Owner = null;
             }
 
-
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Project updated successfully!" });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { Error = ex.Message });
+            var errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+            return BadRequest(new { Error = errorMessage });
         }
     }
+
     [HttpDelete("DeleteProject/{projectId}")]
     public async Task<IActionResult> DeleteProject(int projectId)
     {
@@ -269,7 +288,7 @@ public class ProjectUpdateRequest
 {
     public string ProjectName { get; set; }
     public int? TagId { get; set; }
-    public List<int> Members { get; set; }
+    public List<MemberDto> Members { get; set; }    
 }
 
 // DTO for creating a project
@@ -283,6 +302,7 @@ public class CreateProjectDto
     public class MemberDto
     {
         public int UserId { get; set; }
+        public int MemberRole { get; set; }
 
     }
 

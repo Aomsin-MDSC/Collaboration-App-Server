@@ -47,6 +47,7 @@ public class MembersController : ControllerBase
                 .Select(g => new {
                     User_id = g.Key,
                     User_name = g.FirstOrDefault().User.User_name,
+                    Member_role = g.FirstOrDefault().Member_role
                 })
                 .ToListAsync();
 
@@ -57,6 +58,28 @@ public class MembersController : ControllerBase
             return BadRequest(new { Error = ex.Message });
         }
     }
+
+    [HttpGet("GetMemberRole/{projectId}/{userId}")]
+    public async Task<IActionResult> GetMemberRole(int projectId, int userId)
+    {
+        try
+        {
+            var member = await _context.Members
+                .FirstOrDefaultAsync(m => m.Project_id == projectId && m.User_id == userId);
+
+            if (member == null)
+            {
+                return NotFound(new { Message = "Member not found in the project." });
+            }
+
+            return Ok(new { Member_role = member.Member_role });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
 
 }
 
