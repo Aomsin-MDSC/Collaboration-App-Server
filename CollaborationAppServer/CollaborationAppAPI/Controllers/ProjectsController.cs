@@ -194,24 +194,19 @@ public class ProjectsController : ControllerBase
                 var existingMember = project.Members.FirstOrDefault(m => m.User_id == memberDto.UserId);
                 if (existingMember == null)
                 {
-                    // สมาชิกใหม่
                     var newMember = new Member
                     {
                         Project_id = projectId,
                         User_id = memberDto.UserId,
                         Member_role = memberDto.MemberRole,
-                        // ไม่ต้องระบุ Member_id เพราะฐานข้อมูลจะจัดการเอง
                     };
                     _context.Members.Add(newMember);
                 }
                 else
                 {
-                    // อัปเดต Role ของสมาชิกที่มีอยู่
                     existingMember.Member_role = memberDto.MemberRole;
                 }
             }
-
-
 
             project.Project_name = request.ProjectName;
             project.Tag_id = request.TagId;
@@ -262,7 +257,10 @@ public class ProjectsController : ControllerBase
                 return NotFound(new { Message = "Project not found." });
             }
 
-            if (project.User_id != userId)
+            var isOwner = project.User_id == userId;
+            var isManager = project.Members.Any(m => m.User_id == userId && m.Member_role == 0);
+
+            if (!isOwner && !isManager)
             {
                 return Forbid("You do not have permission to delete this project.");
             }
