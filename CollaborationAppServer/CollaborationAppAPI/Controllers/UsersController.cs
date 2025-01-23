@@ -93,6 +93,11 @@ namespace CollaborationAppAPI.Controllers
                 return Unauthorized(new { Message = "Invalid credentials" });
             }
 
+            if (!string.IsNullOrEmpty(user.User_token))
+            {
+                return Conflict("This account is already logged in on another device.");
+            }
+
             var token = GenerateJwtToken(user);
 
             return Ok(new
