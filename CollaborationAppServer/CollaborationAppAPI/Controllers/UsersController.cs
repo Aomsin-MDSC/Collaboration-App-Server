@@ -143,10 +143,35 @@ namespace CollaborationAppAPI.Controllers
             }
         }
 
+        [HttpPost("DeleteTokenDevice")]
+        public async Task<IActionResult> DeleteTokenDevice([FromBody] LogoutRequest dto)
+        {
+            try
+            {
+                var existingUser = await _context.Users.FindAsync(dto.UserId);
+                existingUser.User_token = null;
+
+                _context.Users.Update(existingUser);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "UserToken deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message, Details = ex.InnerException?.Message });
+            }
+        }
+
         public class UserTokenUpdateDTO
         {
             public string User_token { get; set; } 
-        }   
+        }
+
+        public class LogoutRequest
+        {
+            public int UserId { get; set; }
+        }
+
 
         private string GenerateJwtToken(User user)
         {
