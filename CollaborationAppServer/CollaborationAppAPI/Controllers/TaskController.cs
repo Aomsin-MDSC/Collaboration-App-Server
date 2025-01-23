@@ -29,7 +29,23 @@ public class TaskController : ControllerBase
                 .Include(t => t.Tag)
                 .Where(t => t.Project_id == projectId)
                 .OrderBy(t => t.Task_order)
-                .Select(t => new { t.Task_id, t.Task_name, t.Task_detail, t.Task_end, t.Task_color, t.Task_status, t.User_id, t.Tag_id, t.Project_id, t.User.User_name,t.Task_Owner,t.Tag.Tag_name,t.Tag.Tag_color,t.Task_order })
+                .Select(t => new { t.Task_id, 
+                    t.Task_name, 
+                    t.Task_detail, 
+                    t.Task_end, 
+                    t.Task_color, 
+                    t.Task_status, 
+                    t.User_id, 
+                    t.Tag_id, 
+                    t.Project_id,
+                    t.Task_Owner,
+                    Owner_name = _context.Users
+                    .Where(u => u.User_id == t.Task_Owner) 
+                    .Select(u => u.User_name)
+                    .FirstOrDefault(),
+                    t.Tag.Tag_name,
+                    t.Tag.Tag_color,
+                    t.Task_order })
 
                 .ToListAsync();
 
