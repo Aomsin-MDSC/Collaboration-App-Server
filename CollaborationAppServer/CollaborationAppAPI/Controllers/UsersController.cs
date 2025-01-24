@@ -85,12 +85,23 @@ namespace CollaborationAppAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLogin userLogin)
         {
+
+            if (string.IsNullOrWhiteSpace(userLogin.UserName))
+            {
+                return BadRequest(new { Message = "Please enter your Username." });
+            }
+
+            if (string.IsNullOrWhiteSpace(userLogin.Password))
+            {
+                return BadRequest(new { Message = "Please enter your Password." });
+            }
+
             var user = await _context.Users
                                       .FirstOrDefaultAsync(u => u.User_name == userLogin.UserName);
 
             if (user == null || user.User_password != userLogin.Password)
             {
-                return Unauthorized(new { Message = "Invalid credentials" });
+                return Unauthorized(new { Message = "UserName or Password is invalid" });
             }
 
             if (!string.IsNullOrEmpty(user.User_token))
