@@ -147,23 +147,29 @@ public async System.Threading.Tasks.Task NotificationTaskStatus(int projectId,st
 {
     try
     {
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(t => t.Project_id == projectId);
+            var memberList = await _context.Members
+              .Where(m => m.Project_id == projectId)
+              .Include(m => m.User)
+              .ToListAsync();
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.User_id == project.User_id);
+            var tokens = memberList
+                .Where(m => m.Member_role == 0)
+                .Select(m => m.User.User_token)
+                 .Distinct()
+                .ToList();
 
-            var message = new Message()
+            var message = new MulticastMessage()
         {
-            Token = user.User_token,
+            Tokens = tokens,
             Notification = new Notification
             {
                 Title = $"{taskName}",
                 Body = "Change status is done.",
             },
         };
-        var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-    }
+        var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+
+        }
     catch (Exception ex)
     {
             Console.WriteLine($"Error: {ex.Message}");
