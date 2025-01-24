@@ -106,7 +106,7 @@ namespace CollaborationAppAPI.Controllers
 
             if (!string.IsNullOrEmpty(user.User_token))
             {
-                return Conflict("This account is already logged in on another device.");
+                return Conflict(new { Message = "Other users are currently using it." });
             }
 
             var token = GenerateJwtToken(user);
